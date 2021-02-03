@@ -37,11 +37,23 @@ func NewChecker(opts ...Option) (*Checker, error) {
 // Check attempts to ping the given device. If all pings return successfully
 // then the check is considered healthy. Any missed packets will result in an
 // unhealthy check
-func (c *Checker) Check(d *barrelman.Device) (string, error) {
+func (c *Checker) Check(d *barrelman.Device, forceRecheck bool) barrelman.CheckResult {
+	result := barrelman.CheckResult{
+		RunTime: time.Now(),
+		Passed:  true,
+		Event: barrelman.Event{
+			Device: d,
+			Key:    "online",
+			Value:  "Online",
+		},
+	}
 
 	pinger, err := ping.NewPinger(d.Address)
 	if err != nil {
-		return "", fmt.Errorf("creating pinger: %w", err)
+		result.Passed = false
+		result.Error = fmt.Sprintf("Failed to creating pinger: %s", err)
+		result.Event.Value = "Offline"
+		return result
 	}
 
 	pinger.Count = c.numPings
@@ -53,12 +65,15 @@ func (c *Checker) Check(d *barrelman.Device) (string, error) {
 	stats := pinger.Statistics()
 
 	if stats.PacketLoss == 0 {
-		return fmt.Sprintf(
+		result.Message = fmt.Sprintf(
 			"All pings returned successfully with average RTT of %fms",
 			float64(stats.AvgRtt/time.Millisecond),
-		), nil
+		)
+		return result
 	}
 
-	return "",
-		fmt.Errorf("Lost %d of %d pings", c.numPings-stats.PacketsRecv, c.numPings)
+	result.Error = fmt.Sprintf("Lost %d of %d pings", c.numPings-stats.PacketsRecv, c.numPings)
+	result.Passed = false
+	result.Event.Value = "Offline"
+	return result
 }

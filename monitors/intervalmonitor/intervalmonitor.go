@@ -3,6 +3,7 @@ package intervalmonitor
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/byuoitav/barrelman"
@@ -11,20 +12,36 @@ import (
 // Monitor contains all of the data used by the IntervalMonitor
 type Monitor struct {
 	// Options
-	interval int
-	jitter   int
+	jitter       int
+	eventEmitter barrelman.EventEmitter
 
+	checkers       map[string]barrelman.Checker
+	checkStateChan chan deviceCheckMsg
+
+	deviceMu sync.RWMutex
 	devices  map[string]barrelman.DeviceStatus
-	checkers map[string]barrelman.Checker
+}
+
+type wrappedChecker struct {
+	c         barrelman.Checker
+	name      string
+	stateChan chan deviceCheckMsg
+}
+
+type deviceCheckMsg struct {
+	deviceID string
+	checker  string
+	result   *barrelman.CheckResult
 }
 
 // NewMonitor returns a new IntervalMonitor with the given options set
 func NewMonitor(opts ...Option) (*Monitor, error) {
 	m := Monitor{
-		interval: 600,
-		jitter:   30,
-		devices:  make(map[string]barrelman.DeviceStatus),
-		checkers: make(map[string]barrelman.Checker),
+		jitter:         30,
+		eventEmitter:   nil,
+		devices:        make(map[string]barrelman.DeviceStatus),
+		checkers:       make(map[string]barrelman.Checker),
+		checkStateChan: make(chan deviceCheckMsg, 100),
 	}
 
 	// Apply options
@@ -35,36 +52,69 @@ func NewMonitor(opts ...Option) (*Monitor, error) {
 	return &m, nil
 }
 
+// listenForChecks listens for updates on device checks and writes them
+// to the device state
+func (m *Monitor) listenForChecks() {
+	for {
+		msg := <-m.checkStateChan
+
+		// Write the new check to the device stateChan
+		m.deviceMu.Lock()
+		m.devices[msg.deviceID].CheckStatus[msg.checker] = *msg.result
+		m.deviceMu.Unlock()
+
+		// If there is an event emitter then send the event
+		if m.eventEmitter != nil {
+			go m.eventEmitter.Send(msg.result.Event)
+		}
+	}
+}
+
 // RegisterChecker registers the given checker under the given name to be run on
-// all devices registered in this monitor
-func (m *Monitor) RegisterChecker(name string, c barrelman.Checker) error {
+// all devices registered in this monitor on the given interval (measured in seconds)
+func (m *Monitor) RegisterChecker(name string, interval int, c barrelman.Checker) error {
 	// Check for existing checker
 	if _, ok := m.checkers[name]; ok {
 		return fmt.Errorf("Checker already registered with name %s", name)
 	}
 
+	wc := &wrappedChecker{
+		c:         c,
+		name:      name,
+		stateChan: m.checkStateChan,
+	}
+
 	// Register checker
-	m.checkers[name] = c
+	m.checkers[name] = wc
+
 	return nil
+}
+
+// Check re-implements the barrelman.Checker interface but allows the check
+// results to be sent back through the monitor's channel
+func (wc *wrappedChecker) Check(d *barrelman.Device, recheck bool) barrelman.CheckResult {
+	result := wc.c.Check(d, recheck)
+
+	wc.stateChan <- deviceCheckMsg{
+		deviceID: d.Name,
+		checker:  wc.name,
+		result:   &result,
+	}
+
+	return result
 }
 
 // RegisterDevice registers the given device to have all the registered checks
 // run against it on an interval
 func (m *Monitor) RegisterDevice(d *barrelman.Device) error {
-	// Check for already existing device
-	if _, ok := m.devices[d.Name]; ok {
-		return fmt.Errorf("Device already registered with name %s", d.Name)
-	}
-
 	// Register device
+	m.deviceMu.Lock()
 	m.devices[d.Name] = barrelman.DeviceStatus{
 		Device:      d,
 		Healthy:     false,
-		CheckStatus: make(map[string]barrelman.DeviceCheckStatus),
+		CheckStatus: make(map[string]barrelman.CheckResult),
 	}
-
-	// Start periodic checks
-	go m.intervalCheck(d.Name)
+	m.deviceMu.Unlock()
 
 	return nil
 }
@@ -80,44 +130,46 @@ func (m *Monitor) ForceCheck(name string) error {
 	return fmt.Errorf("No device found with name %s", name)
 }
 
+// check is the internal function to run all checks on a device
+func (m *Monitor) check(deviceName string) {
+	// Get device
+	m.deviceMu.RLock()
+	d := m.devices[deviceName]
+	m.deviceMu.RUnlock()
+
+	// Run all checkers
+	for _, c := range m.checkers {
+		c.Check(d.Device, true)
+	}
+}
+
 // Status will return the current status of the given device (by name)
 func (m *Monitor) Status(name string) (barrelman.DeviceStatus, error) {
-	if status, ok := m.devices[name]; ok {
+	m.deviceMu.RLock()
+	status, ok := m.devices[name]
+	m.deviceMu.RUnlock()
+
+	if ok {
 		return status, nil
 	}
 
 	return barrelman.DeviceStatus{}, fmt.Errorf("No device found with name %s", name)
 }
 
-// intervalCheck is the internal function used to continuously check on a device
-// at the configured interval and jitter
-func (m *Monitor) intervalCheck(deviceName string) {
+// intervalChecker is the internal function used to continuously run a checker
+// on all devices at the configured interval and jitter
+func (m *Monitor) intervalChecker(c wrappedChecker, interval int) {
 	for {
-		m.check(deviceName)
-
 		// Sleep for the standard interval minus a random number of seconds from
 		// 0 to m.jitter. This helps to distribute large amounts of checks better
-		interval := time.Duration(m.interval-rand.Intn(m.jitter)) * time.Second
+		interval := time.Duration(interval-rand.Intn(m.jitter)) * time.Second
 		time.Sleep(interval)
-	}
-}
 
-// check is the internal function to run all checks on a device
-func (m *Monitor) check(deviceName string) {
-	for checkName, c := range m.checkers {
-		status := barrelman.DeviceCheckStatus{
-			RunTime: time.Now(),
+		// Initiate checks on all devices
+		m.deviceMu.RLock()
+		for _, d := range m.devices {
+			go c.Check(d.Device, false)
 		}
-
-		msg, err := c.Check(m.devices[deviceName].Device)
-		if err != nil {
-			status.Error = err.Error()
-			status.Passed = false
-		} else {
-			status.Message = msg
-			status.Passed = true
-		}
-
-		m.devices[deviceName].CheckStatus[checkName] = status
+		m.deviceMu.RUnlock()
 	}
 }

@@ -6,7 +6,7 @@ import "time"
 // the outcomes of the checks according to the individual monitor's
 // implementation details.
 type DeviceMonitor interface {
-	RegisterChecker(name string, c *Checker) error
+	RegisterChecker(name string, interval time.Duration, c *Checker) error
 	RegisterDevice(*Device) error
 
 	// ForceCheck forces the DeviceMonitor to immediately run all checks for the
@@ -29,22 +29,5 @@ type DeviceStatus struct {
 
 	// CheckStatus is a map of all the checkers being run by the
 	// DeviceMonitor to their detailed status information
-	CheckStatus map[string]DeviceCheckStatus
-}
-
-// DeviceCheckStatus represents the status of a check run on a specific device.
-type DeviceCheckStatus struct {
-	// RunTime is the time when the last check was run
-	RunTime time.Time
-
-	// Passed is true if the check ran successfully on the device last time
-	Passed bool
-
-	// Message is the message returned from the checker from the last run for
-	// the given device
-	Message string
-
-	// Error is the error returned from the last run of the checker for this
-	// device. This will be empty if passed is true in most cases
-	Error string
+	CheckStatus map[string]CheckResult
 }

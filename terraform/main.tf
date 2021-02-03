@@ -37,13 +37,13 @@ data "aws_ssm_parameter" "eventhub_address" {
   name = "/env/hub-address"
 }
 
-module "shipyard_prd" {
+module "central_monitoring_prd" {
   source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
 
   // required
   name           = "central-monitoring-prd"
   image          = "docker.pkg.github.com/byuoitav/barrelman/barrelman-dev"
-  image_version  = "b0d52c5"
+  image_version  = "4dc4e6c"
   container_port = 80 // doesn't actually exist in container
   repo_url       = "https://github.com/byuoitav/barrelman"
 
