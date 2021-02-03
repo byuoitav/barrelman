@@ -95,7 +95,7 @@ func (s *Service) GetCentralMonitoringDevice(name string) (*barrelman.Device, er
 func (s *Service) GetAllCentralMonitoringDevices() ([]*barrelman.Device, error) {
 	db := s.client.DB(context.TODO(), _centralMonitoringDB)
 
-	doc := devicesDoc{}
+	doc := centralDevicesDoc{}
 	err := db.Get(context.TODO(), "default").ScanDoc(&doc)
 	if err != nil {
 		return nil, fmt.Errorf("retrieving central monitoring doc: %w", err)
@@ -105,9 +105,8 @@ func (s *Service) GetAllCentralMonitoringDevices() ([]*barrelman.Device, error) 
 	devs := []*barrelman.Device{}
 	for _, d := range doc.Devices {
 		devs = append(devs, &barrelman.Device{
-			Name:          d.Name,
-			Address:       d.Address,
-			CheckerConfig: d.CheckerConfig,
+			Name:    d.Name,
+			Address: d.Address,
 		})
 	}
 

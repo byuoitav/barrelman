@@ -17,6 +17,7 @@ github.com/go-kivik/couchdb/v3 v3.2.2 h1:K+cS9HoDvynDUSz5q8W/iInbm2BmOJFSGLYELH9
 github.com/go-kivik/couchdb/v3 v3.2.2/go.mod h1:dS2xYcrlFTYMnWDafe2u4bdCaYWPcU8S0ZfTRLpqF1g=
 github.com/go-kivik/kivik v1.8.1 h1:GScP1mS5wP2km2awszvKzPEjC21lYjQGr3GY+4a/o2U=
 github.com/go-kivik/kivik v2.0.0+incompatible h1:/7hgr29DKv/vlaJsUoyRlOFq0K+3ikz0wTbu+cIs7QY=
+github.com/go-kivik/kivik v2.0.0+incompatible/go.mod h1:nIuJ8z4ikBrVUSk3Ua8NoDqYKULPNjuddjqRvlSUyyQ=
 github.com/go-kivik/kivik/v3 v3.0.1/go.mod h1:7tmQDvkta/pcijpUjLMsQ9HJUELiKD5zm6jQ3Gb9cxE=
 github.com/go-kivik/kivik/v3 v3.2.0 h1:YQ6j89DrQwNdMdpWioObEP+pYTSAtF58HomS5ROfKc0=
 github.com/go-kivik/kivik/v3 v3.2.0/go.mod h1:chqVuHKAU9j2C7qL0cAH2FCO26oL+0B4aIBeCRMnLa8=

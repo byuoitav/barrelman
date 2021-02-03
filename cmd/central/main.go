@@ -30,7 +30,7 @@ func main() {
 		log.Panicf("Failed to initialize couch: %s", err)
 	}
 
-	devs, err := c.GetAllDevices()
+	devs, err := c.GetAllCentralMonitoringDevices()
 	if err != nil {
 		log.Panicf("Failed to get receivers from database: %s", err)
 	}
@@ -45,7 +45,7 @@ func main() {
 		log.Panicf("Failed to initialize ping checker: %s", err)
 	}
 
-	m.RegisterChecker("ping", pingChecker)
+	m.RegisterChecker("ping", 120, pingChecker)
 
 	log.Printf("Beginning monitoring...")
 
