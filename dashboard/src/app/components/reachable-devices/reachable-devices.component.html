@@ -1,0 +1,115 @@
+<mat-progress-bar color="accent" mode="query"></mat-progress-bar>
+
+<div class="container">
+  <mat-accordion [multi]="false">
+    <!--
+    <ng-container *ngFor="let result of pingResult?.unsuccessful">
+      <ng-container
+        *ngTemplateOutlet="pingInfoList; context: { result: result }"
+      ></ng-container>
+    </ng-container>
+
+    <ng-container *ngFor="let result of pingResult?.successful">
+      <ng-container
+        *ngTemplateOutlet="pingInfoList; context: { result: result }"
+      ></ng-container>
+    </ng-container>
+      -->
+    <ng-container>
+      <mat-expansion-panel [hideToggle]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title> ID </mat-panel-title>
+
+          <mat-panel-description>
+            "Unable to resolve" 
+
+            <div id="status-theme" class="statusbar">
+              <span>
+                <!-- pingable icon -->
+                <mat-icon color="primary">wifi</mat-icon>
+                <mat-icon color="accent">wifi</mat-icon>
+                <mat-icon color="warn">wifi</mat-icon>
+              </span>
+
+              <!-- healthy icon -->
+              <span>
+                <mat-icon color="primary">thumb_up</mat-icon>
+                <mat-icon color="warn">thumb_down</mat-icon>
+              </span>
+
+              <span>
+                <mat-icon style="color: grey;">hot_tub</mat-icon>
+              </span>
+
+            </div>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-list>
+          <mat-list-item>
+            <div class="list-item">
+              <span>Device ID</span>
+              <pre> Device ID </pre>
+            </div>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+
+          <mat-list-item>
+            <div class="list-item">
+              <span>Resolved IP</span>
+              <pre> Device Ip </pre>
+            </div>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+
+          <mat-list-item class="json">
+            <div class="list-item">
+              <span>Ping Error</span>
+              <pre> Ping Error </pre>
+            </div>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+
+          <mat-list-item class="json">
+            <div class="list-item">
+              <span>Health Check Response</span>
+              <pre> Health Check </pre>
+            </div>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+
+          <mat-list-item>
+            <div class="list-item">
+              <span>Packets Sent</span>
+              <pre>Packets Sent</pre>
+            </div>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+
+          <mat-list-item>
+            <div class="list-item">
+              <span>Packets Received</span>
+              <pre>Packets Received</pre>
+            </div>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+
+          <mat-list-item>
+            <div class="list-item">
+              <span>Packets Lost</span>
+              <pre>Packets Lost</pre>
+            </div>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+
+          <mat-list-item>
+            <div class="list-item">
+              <span>Average Round Trip Time</span>
+              <pre>Avg. Round Trip</pre>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </mat-expansion-panel>
+    </ng-container>
+  </mat-accordion>
+</div>
