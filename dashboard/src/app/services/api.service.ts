@@ -1,8 +1,23 @@
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
 import { JsonConvert, OperationMode, ValueCheckingMode} from "json2typescript";
-
+import {tap, map, catchError} from "rxjs/operators"
 import { MatDialog } from '@angular/material/dialog';
+
+export interface DeviceInfo {
+  hostname: string;
+  id: string;
+  internetConnectivity: boolean;
+  ip: string;
+  dhcp: DHCPInfo;
+}
+
+export interface DHCPInfo {
+  error: any;
+  enabled: boolean;
+  toogleable: boolean;
+}
 
 
 @Injectable({
@@ -63,21 +78,14 @@ export class ApiService {
     }*/
   }
 
-  public async getDeviceInfo() {
-    /*try {
-      const data = await this.http.get("device").toPromise();
-      const deviceInfo = this.jsonConvert.deserializeObject(data, DeviceInfo);
-
-      return deviceInfo;
-    } catch (e) {
-      const deviceInfo = this.jsonConvert.deserializeObject(
-        e.error,
-        DeviceInfo
-      );
-
-      console.error("error getting device info:", e);
-      return deviceInfo;
-    }*/
+  getDeviceInfo(): Observable<DeviceInfo>{
+    return this.http.get<DeviceInfo>("device", {
+    }).pipe(
+      catchError(this.handleError<DeviceInfo>("getDeviceInfo", undefined)),
+      map((deviceInfo: DeviceInfo) => {
+          return deviceInfo;
+      }),
+    )
   }
 
   public async getMaintenanceMode() {
@@ -256,7 +264,11 @@ export class ApiService {
     });
   }
 
-
-
+  private handleError<T>(operation = 'operation', result?:T){
+    return(error: any): Observable<T> => {
+      console.error( `error doing ${operation}`, error);
+      return of(result as T);
+    }
+  }
 
 }

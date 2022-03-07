@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
 import { ApiService } from 'src/app/services/api.service';
+import { DeviceInfo, PingResult } from '../../objects';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-overview',
@@ -10,8 +12,8 @@ import { ApiService } from 'src/app/services/api.service';
 export class OverviewComponent implements OnInit {
 
   public hasDividerSensors: boolean | undefined;
-  public deviceInfo: void | undefined;
-  public pingResult:  void | undefined;
+  public deviceInfo: any;
+  public pingResult:  Map<string, PingResult> | undefined | void;
   public dividerSensorStatus: string | undefined;
   public dividerSensorAddr: string | undefined;
   // public maintenanceMode: boolean;
@@ -19,7 +21,8 @@ export class OverviewComponent implements OnInit {
   constructor(public api: ApiService) {}
 
   async ngOnInit() {
-    this.deviceInfo = await this.api.getDeviceInfo();
+
+    this.deviceInfo = this.api.getDeviceInfo();
     console.log("device info", this.deviceInfo);
 
     this.pingResult = await this.api.getRoomPing();

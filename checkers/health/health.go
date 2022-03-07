@@ -11,6 +11,7 @@ import (
 	"golang.org/x/sync/singleflight"
 
 	"github.com/byuoitav/barrelman"
+	"golang.org/x/sync/singleflight"
 )
 
 // roomHealth and deviceHealth encapsulate the response from the av api
@@ -118,26 +119,26 @@ func (c *Checker) refreshRoomHealth(room string) (roomHealth, error) {
 	// Make health request
 	res, err := http.Get(url)
 	if err != nil {
-		return roomHealth{}, fmt.Errorf("Failed to get room health: %w", err)
+		return roomHealth{}, fmt.Errorf("failed to get room health: %w", err)
 	}
 	defer res.Body.Close()
 
 	// Read body
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return roomHealth{}, fmt.Errorf("Failed to read response body: %w", err)
+		return roomHealth{}, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	// Error if we didn't get a 2XX response code
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return roomHealth{}, fmt.Errorf("Got non 200 status back from api: %s", body)
+		return roomHealth{}, fmt.Errorf("got non 200 status back from api: %s", body)
 	}
 
 	// Parse response
 	h := roomHealth{}
 	err = json.Unmarshal(body, &h)
 	if err != nil {
-		return roomHealth{}, fmt.Errorf("Failed to parse response body: %w", err)
+		return roomHealth{}, fmt.Errorf("failed to parse response body: %w", err)
 
 	}
 
