@@ -1,0 +1,7 @@
+{
+  "/api": {
+    "target": "http://itb-sam-cp1:10000/api",
+    "secure": true,
+    "changeOrigin": true
+  }
+}

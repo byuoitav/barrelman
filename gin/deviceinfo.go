@@ -1,4 +1,4 @@
-package handlers
+package gin
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 // DeviceInfo
-type DeviceInfo struct {
+type deviceInfo struct {
 	Hostname             string `json:"hostname,omitempty"`
 	ID                   string `json:"id,omitempty"`
 	IP                   string `json:"ip,omitempty"`
@@ -22,9 +22,9 @@ type DeviceInfo struct {
 }
 
 //getDeviceInfo responds with the list of the device info as JSON
-func GetDeviceInfo(c *gin.Context) {
+func getDeviceInfo(c *gin.Context) {
 
-	var info DeviceInfo
+	var info deviceInfo
 	var err error
 
 	info.Hostname, err = localsystem.Hostname()
@@ -65,7 +65,7 @@ func GetDeviceInfo(c *gin.Context) {
 }
 
 // GetHostname returns the device's hostname
-func GetHostname(c *gin.Context) {
+func getHostname(c *gin.Context) {
 	hostname, err := localsystem.Hostname()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
@@ -76,7 +76,7 @@ func GetHostname(c *gin.Context) {
 }
 
 // GetDeviceID returns the device's id
-func GetDeviceID(c *gin.Context) {
+func getDeviceID(c *gin.Context) {
 	id, err := localsystem.SystemID()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
@@ -87,7 +87,7 @@ func GetDeviceID(c *gin.Context) {
 }
 
 // GetIPAddress returns the device's ip address
-func GetIPAddress(c *gin.Context) {
+func getIPAddress(c *gin.Context) {
 	ip, err := localsystem.IPAddress()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
@@ -98,13 +98,13 @@ func GetIPAddress(c *gin.Context) {
 }
 
 // IsConnectedToInternet returns whether the device is connected to the internet or not
-func IsConnectedToInternet(c *gin.Context) {
+func isConnectedToInternet(c *gin.Context) {
 	status := localsystem.IsConnectedToInternet()
 	c.IndentedJSON(http.StatusOK, fmt.Sprintf("%v", status))
 }
 
 // GetDHCPState returns whether or not dhcp is enabled and if it can be toggled or not
-func GetDHCPState(c *gin.Context) {
+func getDHCPState(c *gin.Context) {
 	ret := make(map[string]interface{})
 
 	usingDHCP, err := localsystem.UsingDHCP()

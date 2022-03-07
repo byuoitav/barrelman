@@ -37,6 +37,9 @@ deps:
 	@echo Downloading backend dependencies...
 	@go mod download
 
+	@echo Installing UI dependencies...
+	cd dashboard && npm install
+
 build: deps
 	@mkdir -p dist
 
@@ -47,6 +50,10 @@ build: deps
 	@echo
 	@echo Building local monitoring for linux-arm...
 	@env CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -v -o ./dist/${NAME}-local-linux-arm ${BUILD_PKG_LOCAL}
+
+	@echo
+	@echo Building local monitoring UI...
+	cd dashboard/ && npm run-script build && ls -la && mv ./dist/dashboard ../dist/website && rmdir ./dist
 
 	@echo
 	@echo Build output is located in ./dist/.

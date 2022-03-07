@@ -8,8 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/sync/singleflight"
-
 	"github.com/byuoitav/barrelman"
 	"golang.org/x/sync/singleflight"
 )
