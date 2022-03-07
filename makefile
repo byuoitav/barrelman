@@ -42,11 +42,11 @@ build: deps
 
 	@echo
 	@echo Building central monitoring for linux-amd64...
-	@env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./dist/${NAME}-central-linux-amd64 ${BUILD_PKG}
+	@env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./dist/${NAME}-central-linux-amd64 ${BUILD_PKG_CENTRAL}
 
 	@echo
 	@echo Building local monitoring for linux-arm...
-	@env CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -v -o ./dist/${NAME}-local-linux-arm ${BUILD_PKG}
+	@env CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -v -o ./dist/${NAME}-local-linux-arm ${BUILD_PKG_LOCAL}
 
 	@echo
 	@echo Build output is located in ./dist/.
