@@ -2,6 +2,7 @@ package intervalmonitor
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -49,6 +50,10 @@ func NewMonitor(opts ...Option) (*Monitor, error) {
 		opt(&m)
 	}
 
+	rand.Seed(time.Now().UTC().UnixNano())
+
+	go m.listenForChecks()
+
 	return &m, nil
 }
 
@@ -87,13 +92,19 @@ func (m *Monitor) RegisterChecker(name string, interval int, c barrelman.Checker
 	// Register checker
 	m.checkers[name] = wc
 
+	// Start checker
+	go m.intervalChecker(wc, interval)
+
 	return nil
 }
 
 // Check re-implements the barrelman.Checker interface but allows the check
 // results to be sent back through the monitor's channel
 func (wc *wrappedChecker) Check(d *barrelman.Device, recheck bool) barrelman.CheckResult {
+	log.Printf("Running checker %s on device %s\n", wc.name, d.Name)
 	result := wc.c.Check(d, recheck)
+
+	log.Printf("Result: %+v\n", result)
 
 	wc.stateChan <- deviceCheckMsg{
 		deviceID: d.Name,
@@ -158,14 +169,16 @@ func (m *Monitor) Status(name string) (barrelman.DeviceStatus, error) {
 
 // intervalChecker is the internal function used to continuously run a checker
 // on all devices at the configured interval and jitter
-func (m *Monitor) intervalChecker(c wrappedChecker, interval int) {
+func (m *Monitor) intervalChecker(c *wrappedChecker, interval int) {
 	for {
 		// Sleep for the standard interval minus a random number of seconds from
 		// 0 to m.jitter. This helps to distribute large amounts of checks better
 		interval := time.Duration(interval-rand.Intn(m.jitter)) * time.Second
+		log.Printf("Sleeping checker %s for %s\n", c.name, interval)
 		time.Sleep(interval)
 
 		// Initiate checks on all devices
+		log.Printf("Checker %s ranging devices\n", c.name)
 		m.deviceMu.RLock()
 		for _, d := range m.devices {
 			go c.Check(d.Device, false)

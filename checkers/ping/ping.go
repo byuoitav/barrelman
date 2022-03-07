@@ -56,6 +56,7 @@ func (c *Checker) Check(d *barrelman.Device, forceRecheck bool) barrelman.CheckR
 		return result
 	}
 
+	pinger.SetPrivileged(true)
 	pinger.Count = c.numPings
 	pinger.Interval = time.Duration(c.interval) * time.Second
 	pinger.Timeout = time.Duration(c.timeout) * time.Second
@@ -67,7 +68,7 @@ func (c *Checker) Check(d *barrelman.Device, forceRecheck bool) barrelman.CheckR
 	if stats.PacketLoss == 0 {
 		result.Message = fmt.Sprintf(
 			"All pings returned successfully with average RTT of %fms",
-			float64(stats.AvgRtt/time.Millisecond),
+			float64(stats.AvgRtt/time.Nanosecond)/1000000, // Getting ms down to several decimal places
 		)
 		return result
 	}

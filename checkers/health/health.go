@@ -3,11 +3,12 @@ package health
 import (
 	"encoding/json"
 	"fmt"
-	"internal/singleflight"
 	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
+
+	"golang.org/x/sync/singleflight"
 
 	"github.com/byuoitav/barrelman"
 )
@@ -42,6 +43,7 @@ func NewChecker(apiAddress string, opts ...Option) (*Checker, error) {
 	return &Checker{
 		apiAddress:   apiAddress,
 		cacheTimeout: 45, // 45 seconds by default
+		cache:        make(map[string]roomHealth),
 	}, nil
 }
 
@@ -111,7 +113,7 @@ func (c *Checker) Check(d *barrelman.Device, recheck bool) barrelman.CheckResult
 }
 
 func (c *Checker) refreshRoomHealth(room string) (roomHealth, error) {
-	url := fmt.Sprintf("%s/%s/health", c.apiAddress, room)
+	url := fmt.Sprintf("%s/api/v1/room/%s/health", c.apiAddress, room)
 
 	// Make health request
 	res, err := http.Get(url)

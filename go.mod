@@ -15,4 +15,5 @@ require (
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/spf13/pflag v1.0.5
 	go.uber.org/zap v1.16.0 // indirect
+	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 )

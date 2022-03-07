@@ -55,7 +55,7 @@ func main() {
 		log.Panicf("Failed to start event emitter: %s", err)
 	}
 
-	m, err := intervalmonitor.NewMonitor(intervalmonitor.WithEventEmitter(e))
+	m, err := intervalmonitor.NewMonitor(intervalmonitor.WithEventEmitter(e), intervalmonitor.WithJitter(5))
 	if err != nil {
 		log.Panicf("Failed to create interval monitor: %s", err)
 	}
