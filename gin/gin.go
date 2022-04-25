@@ -13,7 +13,7 @@ type Service struct {
 }
 
 func (s *Service) Serve(addr string) error {
-	router := gin.Default()
+	router := gin.New()
 
 	// API Endpoints
 	apiGroup := router.Group("/api/v1")

@@ -61,7 +61,7 @@ func getDeviceInfo(c *gin.Context) {
 		info.DHCPInfo.Togleable = true
 	}
 
-	c.IndentedJSON(http.StatusOK, info)
+	c.JSON(http.StatusOK, info)
 }
 
 // GetHostname returns the device's hostname

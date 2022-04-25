@@ -5,18 +5,18 @@ import { JsonConvert, OperationMode, ValueCheckingMode} from "json2typescript";
 import {tap, map, catchError} from "rxjs/operators"
 import { MatDialog } from '@angular/material/dialog';
 
-export interface DeviceInfo {
-  hostname: string;
-  id: string;
-  internetConnectivity: boolean;
-  ip: string;
-  dhcp: DHCPInfo;
+export class DeviceInfo {
+  hostname: string | undefined;
+  id: string | undefined;
+  internetConnectivity: boolean | undefined;
+  ip: string | undefined;
+  dhcp: DHCPInfo| undefined;
 }
 
-export interface DHCPInfo {
-  error: any;
-  enabled: boolean;
-  toogleable: boolean;
+export class DHCPInfo {
+  error: any | undefined;
+  enabled: boolean| undefined;
+  toogleable: boolean| undefined;
 }
 
 
@@ -79,14 +79,15 @@ export class ApiService {
   }
 
   getDeviceInfo(): Observable<DeviceInfo>{
-    return this.http.get<DeviceInfo>("device", {
-    }).pipe(
-      catchError(this.handleError<DeviceInfo>("getDeviceInfo", undefined)),
-      map((deviceInfo: DeviceInfo) => {
-          return deviceInfo;
-      }),
-    )
+    return this.http.get<DeviceInfo>("/api/v1/device")
+      .pipe(
+        tap(_ => console.log('fetched DeviceInfo')),
+        catchError(this.handleError<DeviceInfo>('getDeviceInfo',))
+      );
   }
+
+
+
 
   public async getMaintenanceMode() {
     return false;
@@ -124,17 +125,13 @@ export class ApiService {
       throw new Error("error getting software status': " + e);
     }*/
   }
-
-  public async getDeviceID() {
-    try {
-      const data = await this.http
-        .get("device/id", { responseType: "text" })
-        .toPromise();
-
-      return data;
-    } catch (e) {
-      throw new Error("error getting device id: " + e);
-    }
+  
+  getDeviceID() {
+    return this.http.get<string>("/api/v1/device/id")
+      .pipe(
+        tap(_ => console.log('fetched DeviceID')),
+        catchError(this.handleError<string>('getDeviceID',))
+      );
   }
 
   public async getRoomPing() {

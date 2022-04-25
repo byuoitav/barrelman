@@ -11,8 +11,8 @@ import { map } from 'rxjs/operators';
 })
 export class OverviewComponent implements OnInit {
 
-  public hasDividerSensors: boolean | undefined;
-  public deviceInfo: any;
+  public hasDividerSensors: boolean | void | undefined;
+  deviceInfo : DeviceInfo | undefined;
   public pingResult:  Map<string, PingResult> | undefined | void;
   public dividerSensorStatus: string | undefined;
   public dividerSensorAddr: string | undefined;
@@ -21,10 +21,8 @@ export class OverviewComponent implements OnInit {
   constructor(public api: ApiService) {}
 
   async ngOnInit() {
-
-    this.deviceInfo = this.api.getDeviceInfo();
-    console.log("device info", this.deviceInfo);
-
+    this.getDeviceInfo();
+   
     this.pingResult = await this.api.getRoomPing();
     console.log("ping result", this.pingResult);
     this.hasDividerSensors = await this.getDividerSensors();
@@ -37,6 +35,11 @@ export class OverviewComponent implements OnInit {
     this.maintenanceMode = await this.api.getMaintenanceMode();
     console.log("maintenanceMode", this.maintenanceMode);
      */
+  }
+
+  getDeviceInfo(): void {
+    this.api.getDeviceInfo().subscribe(deviceInfo => this.deviceInfo = deviceInfo);
+    console.log("device info", this.deviceInfo);
   }
 
   public isDefined(test: any): boolean {
@@ -53,32 +56,35 @@ export class OverviewComponent implements OnInit {
   }
 
   public reachable(): number {
-    /*if (!this.pingResult) {
+    if (!this.pingResult) {
       return 0;
     }
 
     return Array.from(this.pingResult.values()).filter(r => r.packetsLost === 0)
-      .length;*/
-      return 0
+    .length;
   }
 
   public unreachable(): number {
-    /*if (!this.pingResult) {
+    if (!this.pingResult) {
       return 0;
     }
 
     return Array.from(this.pingResult.values()).filter(r => r.packetsLost > 0)
-      .length;*/
-      return 0
+      .length;
+    
   }
 
   public getDividerSensors() {
-    /*for (const k of Array.from(this.pingResult.keys())) {
+    if (!this.pingResult) {
+      return console.error("no divider sensors");
+    }
+
+    for (const k of Array.from(this.pingResult.keys())) {
       if (k.includes("DS1")) {
         this.dividerSensorAddr = k + ".byu.edu";
         return true;
       }
-    }*/
+    }
     return false;
   }
 
@@ -91,5 +97,5 @@ export class OverviewComponent implements OnInit {
       this.dividerSensorStatus = "Disconnected";
     }
   }
-
+ 
 }

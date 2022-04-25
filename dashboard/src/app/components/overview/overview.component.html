@@ -10,7 +10,7 @@
         <mat-list-item>
           <div class="list-item">
             <p>Hostname</p>
-            <p>{{deviceInfo?.hostname}}</p>
+            <p>{{ deviceInfo?.hostname }}</p>
           </div>
         </mat-list-item>
         <mat-divider></mat-divider>
@@ -18,7 +18,7 @@
         <mat-list-item>
           <div class="list-item">
             <p>ID</p>
-            <p>Device Id</p>
+            <p>{{ deviceInfo?.id || "ID" }}</p>
           </div>
         </mat-list-item>
         <mat-divider></mat-divider>
@@ -26,7 +26,7 @@
         <mat-list-item>
           <div class="list-item">
             <p>IP</p>
-            <p> Device ip address </p>
+            <p>{{ deviceInfo?.ip }}</p>
           </div>
         </mat-list-item>
         <mat-divider></mat-divider>

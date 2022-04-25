@@ -1,17 +1,17 @@
 import { toTypeScript } from "@angular/compiler";
 
 export interface DHCPInfo {
-    error: any;
-    enabled: boolean;
-    toogleable: boolean;
+    error: any | undefined;
+    enabled: boolean | undefined;
+    toogleable: boolean | undefined;
 }
 
 export interface DeviceInfo {
-    hostname: string;
-    id: string;
-    internetConnectivity: boolean;
-    ip: string;
-    dhcp: DHCPInfo;
+    hostname: string | undefined;
+    id: string | undefined;
+    internetConnectivity: boolean | undefined;
+    ip: string | undefined;
+    dhcp: DHCPInfo | undefined;
 }
 
 export interface PingResult {
